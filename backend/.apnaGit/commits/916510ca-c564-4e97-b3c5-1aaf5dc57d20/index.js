@@ -39,9 +39,7 @@ yargs(hideBin(process.argv))
                 type: "string",
             })
         },
-        (argv) => {
-            commitChanges(argv.message)
-        }
+        commitChanges
     )
     .command(
         "push",
