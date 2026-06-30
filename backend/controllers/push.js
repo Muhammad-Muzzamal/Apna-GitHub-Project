@@ -27,8 +27,8 @@ async function pushCommand() {
 
                 await s3.upload(params).promise()
             }
-            console.log("All commits are pushed")
         }
+        console.log("All commits are pushed")
     } catch (error) {
         console.error("Error in push", error.message)
         throw error;

@@ -4,7 +4,9 @@ dotenv.config()
 
 const ENV = {
     S3_BUCKET: process.env.S3_BUCKET,
-    AWS_REGION: process.env.AWS_REGION
+    AWS_REGION: process.env.AWS_REGION,
+    AWS_ACCESS_KEY: process.env.AWS_ACCESS_KEY,
+    AWS_SECRETE_KEY: process.env.AWS_SECRETE_KEY
 }
 
 module.exports = {
