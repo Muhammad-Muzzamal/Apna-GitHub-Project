@@ -1,5 +1,5 @@
+const express = require("express")
 const yargs = require("yargs");
-const dotenv = require("dotenv");
 const { hideBin } = require("yargs/helpers");
 const { initRepo } = require("./controllers/init.js");
 const { addFile } = require("./controllers/add.js");
@@ -7,10 +7,13 @@ const { commitChanges } = require("./controllers/commit.js");
 const { pushCommand } = require("./controllers/push.js");
 const { pullRepo } = require("./controllers/pull.js");
 const { revertRepo } = require("./controllers/revert.js");
+const { ENV } = require("./config/env.config.js");
 
-dotenv.config({ silent: true });
+
+const app = express()
 
 yargs(hideBin(process.argv))
+    .command("start", "Start a new Server", {}, startServer)
     .command(
         'init',
         "Initialize a new repository.",
@@ -67,3 +70,11 @@ yargs(hideBin(process.argv))
         revertRepo
     )
     .demandCommand(1, "You need to specify a command.").help().argv;
+
+
+function startServer() {
+    app.listen(ENV.PORT, () => {
+        console.log(`App is listening on http://localhost:${ENV.PORT}`)
+    });
+}
+
