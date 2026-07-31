@@ -12,7 +12,7 @@ const bodyParser = require("body-parser");
 const connectDB = require("./config/db.config.js");
 const http = require("http");
 const cors = require("cors");
-const {Server} = require("socket.io");
+const { Server } = require("socket.io");
 const mongoose = require("mongoose");
 
 yargs(hideBin(process.argv))
@@ -76,39 +76,51 @@ yargs(hideBin(process.argv))
 
 
 async function startServer() {
-    const app = express()
-    app.use(express.json());
-    app.use(cors({ origin: '*' }));
+    try {
 
-    await connectDB();
+        const app = express();
+        app.use(express.json());
+        app.use(cors({ origin: '*' }));
 
-    const httpServer = http.createServer(app);
-    const io = new Server(httpServer, {
-        cors: {
-            origin: "*",
-            methods: ["GET", "POST"]
-        }
-    })
-
-    io.on("connection", (socket) => {
-        socket.on("joinRoom", (userID) => {
-            user = userID;
-            console.log("=======")
-            console.log(user)
-            console.log("=======")
-            socket.join(userID);
+        app.get("/", (req, res) => {
+            res.json({ message: "Wellcome" })
         })
-    })
 
-    const db = mongoose.connection;
-    db.once("open", async () => {
-        console.log("CRUD operation Called");
-        // TODO: CRUD operations
-    })
+        await connectDB();
+
+        const httpServer = http.createServer(app);
+        const io = new Server(httpServer, {
+            cors: {
+                origin: "*",
+                methods: ["GET", "POST"]
+            }
+        })
+
+        let user;
+
+        io.on("connection", (socket) => {
+            socket.on("joinRoom", (userID) => {
+                user = userID;
+                console.log("=======")
+                console.log(user)
+                console.log("=======")
+                socket.join(userID);
+            })
+        })
+
+        const db = mongoose.connection;
+        db.once("open", async () => {
+            console.log("CRUD operation Called");
+            // TODO: CRUD operations
+        })
 
 
-    httpServer.listen(ENV.PORT, () => {
-        console.log(`App is listening on http://localhost:${ENV.PORT}`)
-    });
+        httpServer.listen(ENV.PORT, () => {
+            console.log(`App is listening on http://localhost:${ENV.PORT}`)
+        });
+    } catch (error) {
+        console.error("Server startup failed:", error);
+        process.exit(1);
+    }
 }
 
