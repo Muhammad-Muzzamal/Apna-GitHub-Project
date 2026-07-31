@@ -20,7 +20,7 @@ const signup = async (req, res) => {
             })
         }
 
-        let isUserExist = await User.findOne({ $or: [{ email, username }] });
+        let isUserExist = await User.findOne({ $or: [{ email }, { username }] });
         if (isUserExist) {
 
             const duplicatedField = isUserExist.email === email ? "Email" : "Username";
@@ -66,8 +66,53 @@ const signup = async (req, res) => {
     }
 }
 
-const login = (req, res) => {
-    return res.send("Logging in!");
+const login = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+
+        // check user exist or not
+        const user = await User.findOne({ email }).select("+password");
+        // user not found
+        if (!user) {
+            return res.status(status.UNAUTHORIZED).json({
+                status: "error",
+                message: "No account found for this email. Create an account to get started.",
+                status_code: status.UNAUTHORIZED
+            });
+        }
+
+        // check password is correct
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        // if password is incorrect
+        if (!isMatch) {
+            return res.status(status.UNAUTHORIZED).json({
+                status: "error",
+                message: "Invalid credentials. Please check your password.",
+                status_code: status.UNAUTHORIZED
+            });
+        }
+
+        const token = jwt.sign({ id: user._id }, ENV.JWT_SECRETE, { expiresIn: "1h" });
+
+        return res.status(status.OK).json({
+            status: "success",
+            message: "User logged in successfully.",
+            data: {
+                user: user,
+                token: token
+            },
+            status_code: status.OK
+        });
+
+    } catch (error) {
+        return res.status(status.INTERNAL_SERVER_ERROR).json({
+            status: "error",
+            message: `Internal Server Error ${error.message}`,
+            status_code: status.INTERNAL_SERVER_ERROR
+        })
+    }
 }
 
 const getUserProfile = (req, res) => {
