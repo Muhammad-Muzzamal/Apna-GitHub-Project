@@ -12,7 +12,9 @@ const UserSchema = new Schema({
         unique: true,
     },
     password: {
-        type: String
+        type: String,
+        required: true,
+        select: false
     },
     repositories: [
         {
@@ -38,5 +40,5 @@ const UserSchema = new Schema({
 })
 
 
-const User = mongoose.Model("User", UserSchema);
+const User = mongoose.model("User", UserSchema);
 module.exports = User;

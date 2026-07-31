@@ -22,5 +22,5 @@ const IssueSchema = new Schema({
     }
 });
 
-const Issue = mongoose.Model("Issue", RepoSchema);
+const Issue = mongoose.model("Issue", RepoSchema);
 module.exports = Issue;

@@ -32,5 +32,5 @@ const RepoSchema = new Schema({
 
 });
 
-const Repo = mongoose.Model("Repo", RepoSchema);
+const Repo = mongoose.model("Repo", RepoSchema);
 module.exports = Repo;
