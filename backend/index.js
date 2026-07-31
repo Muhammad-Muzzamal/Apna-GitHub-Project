@@ -14,6 +14,7 @@ const http = require("http");
 const cors = require("cors");
 const { Server } = require("socket.io");
 const mongoose = require("mongoose");
+const mainRouter = require("./routes/main.router.js")
 
 yargs(hideBin(process.argv))
     .command("start", "Start a new Server", {}, startServer)
@@ -81,10 +82,7 @@ async function startServer() {
         const app = express();
         app.use(express.json());
         app.use(cors({ origin: '*' }));
-
-        app.get("/", (req, res) => {
-            res.json({ message: "Wellcome" })
-        })
+        app.use("/api", mainRouter);
 
         await connectDB();
 
