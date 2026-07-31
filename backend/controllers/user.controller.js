@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken")
 const User = require("../models/user.model.js");
 const { ENV } = require("../config/env.config.js");
+const { successResponse, errorResponse } = require("../helper/apiResponse.js")
 
 const getAllUsers = (req, res) => {
     return res.send("All users fetched.");
@@ -13,24 +14,18 @@ const signup = async (req, res) => {
         let { username, email, password } = req.body;
 
         if (!username || !email || !password) {
-            return res.status(status.BAD_REQUEST).json({
-                status: "error",
-                message: "Username, Email and password are required.",
-                status_code: status.BAD_REQUEST
-            })
+            return errorResponse(res, "Username, email, and password are required.", status.BAD_REQUEST);
         }
 
         let isUserExist = await User.findOne({ $or: [{ email }, { username }] });
         if (isUserExist) {
 
             const duplicatedField = isUserExist.email === email ? "Email" : "Username";
-
-            return res.status(status.CONFLICT).json({
-                status: "error",
-                message: `${duplicatedField} already exists`,
-                status_code: status.CONFLICT
-
-            });
+            return errorResponse(
+                res,
+                `${duplicatedField} already exists`,
+                status.CONFLICT
+            )
         }
 
         let hashedPassword = await bcrypt.hash(password, 10);
@@ -47,22 +42,9 @@ const signup = async (req, res) => {
             ENV.JWT_SECRETE,
             { expiresIn: "1h" }
         )
-
-        return res.status(status.CREATED).json({
-            status: "success",
-            message: "User created successfully.",
-            data: {
-                user: user,
-                token: token
-            },
-            status_code: status.CREATED
-        });
+        return successResponse(res, "User created successfully.", { user, token }, status.CREATED);
     } catch (error) {
-        return res.status(status.INTERNAL_SERVER_ERROR).json({
-            status: "error",
-            message: `Internal Server Error ${error.message}`,
-            status_code: status.INTERNAL_SERVER_ERROR
-        })
+        return errorResponse(res, `Internal Server Error ${error.message}`, status.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -75,11 +57,11 @@ const login = async (req, res) => {
         const user = await User.findOne({ email }).select("+password");
         // user not found
         if (!user) {
-            return res.status(status.UNAUTHORIZED).json({
-                status: "error",
-                message: "No account found for this email. Create an account to get started.",
-                status_code: status.UNAUTHORIZED
-            });
+            return errorResponse(
+                res,
+                "No account found for this email. Create an account to get started.",
+                status.UNAUTHORIZED
+            );
         }
 
         // check password is correct
@@ -87,31 +69,20 @@ const login = async (req, res) => {
 
         // if password is incorrect
         if (!isMatch) {
-            return res.status(status.UNAUTHORIZED).json({
-                status: "error",
-                message: "Invalid credentials. Please check your password.",
-                status_code: status.UNAUTHORIZED
-            });
+            return errorResponse(
+                res,
+                "Invalid credentials. Please check your password.",
+                status.UNAUTHORIZED
+            )
         }
 
         const token = jwt.sign({ id: user._id }, ENV.JWT_SECRETE, { expiresIn: "1h" });
 
-        return res.status(status.OK).json({
-            status: "success",
-            message: "User logged in successfully.",
-            data: {
-                user: user,
-                token: token
-            },
-            status_code: status.OK
-        });
+        return successResponse(res, "User logged in successfully.", { user, token }, status.OK);
+
 
     } catch (error) {
-        return res.status(status.INTERNAL_SERVER_ERROR).json({
-            status: "error",
-            message: `Internal Server Error ${error.message}`,
-            status_code: status.INTERNAL_SERVER_ERROR
-        })
+        return errorResponse(res, `Internal Server Error ${error.message}`, status.INTERNAL_SERVER_ERROR);
     }
 }
 
