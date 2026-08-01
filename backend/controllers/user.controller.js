@@ -302,6 +302,14 @@ const updateUserProfile = async (req, res) => {
         return errorResponse(res, "Invalid user ID.", status.BAD_REQUEST);
     }
 
+    if (!email || !password) {
+        return errorResponse(
+            res,
+            "Email and password are required.",
+            status.BAD_REQUEST
+        );
+    }
+
     try {
         const isUserExist = await User.findById(id);
         if (!isUserExist) {
@@ -315,7 +323,7 @@ const updateUserProfile = async (req, res) => {
             updatedFields.password = await bcrypt.hash(password, 10);
         }
 
-        const updatedUser = await User.findByIdAndUpdate(id, updatedFields)
+        const updatedUser = await User.findByIdAndUpdate(id, updatedFields, { new: true, runValidators: true })
         return successResponse(
             res,
             "User profile updated successfully.",
