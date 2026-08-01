@@ -250,12 +250,145 @@ const getUserProfile = async (req, res) => {
     }
 }
 
-const updateUserProfile = (req, res) => {
-    return res.send("user profile updated.");
+/**
+ * @route   PUT /api/updateProfile/:id
+ * @desc    Update a user's profile information.
+ *
+ * This endpoint updates the specified user's email and/or password.
+ * If a new password is provided, it is securely hashed before being
+ * stored in the database. Only the fields included in the request
+ * body are updated.
+ *
+ * @access  Public
+ *
+ * @param
+ * id - The unique MongoDB ObjectId of the user.
+ *
+ * @body
+ * {
+ *   "email": "newemail@example.com",      // Optional
+ *   "password": "NewSecurePassword123"    // Optional
+ * }
+ *
+ * @success 200 OK
+ * {
+ *   "success": true,
+ *   "message": "User profile updated successfully.",
+ *   "data": {
+ *     "user": {
+ *       "_id": "...",
+ *       "username": "john_doe",
+ *       "email": "newemail@example.com",
+ *       ...
+ *     }
+ *   }
+ * }
+ *
+ * @error 400 Bad Request
+ * Invalid user ID.
+ *
+ * @error 404 Not Found
+ * User not found.
+ *
+ * @error 500 Internal Server Error
+ * An unexpected error occurred while updating the user profile.
+ */
+const updateUserProfile = async (req, res) => {
+    const { id } = req.params;
+    const { email, password } = req.body;
+
+    // check validity of user id
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return errorResponse(res, "Invalid user ID.", status.BAD_REQUEST);
+    }
+
+    try {
+        const isUserExist = await User.findById(id);
+        if (!isUserExist) {
+            return errorResponse(res, `User not found.`, status.NOT_FOUND);
+        }
+        const updatedFields = {};
+        if (email) {
+            updatedFields.email = email;
+        }
+        if (password) {
+            updatedFields.password = await bcrypt.hash(password, 10);
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(id, updatedFields)
+        return successResponse(
+            res,
+            "User profile updated successfully.",
+            { user: updatedUser },
+            status.OK
+        );
+
+    } catch (error) {
+        return errorResponse(res, `Internal Server Error : ${error.message}`, status.INTERNAL_SERVER_ERROR);
+    }
 }
 
-const deleteUserProfile = (req, res) => {
-    return res.send("user profile deleted.");
+/**
+ * @route   DELETE /api/deleteProfile/:id
+ * @desc    Delete a user profile by its ID.
+ *
+ * This endpoint permanently removes the specified user from the
+ * database. It first validates the provided user ID and ensures
+ * that the user exists before performing the deletion.
+ *
+ * @access  Public
+ *
+ * @param
+ * id - The unique MongoDB ObjectId of the user.
+ *
+ * @success 200 OK
+ * {
+ *   "success": true,
+ *   "message": "User deleted successfully.",
+ *   "data": {
+ *     "user": {
+ *       "_id": "...",
+ *       "username": "john_doe",
+ *       "email": "john@example.com",
+ *       ...
+ *     }
+ *   }
+ * }
+ *
+ * @error 400 Bad Request
+ * Invalid user ID.
+ *
+ * @error 404 Not Found
+ * User not found.
+ *
+ * @error 500 Internal Server Error
+ * An unexpected error occurred while deleting the user.
+ */
+const deleteUserProfile = async (req, res) => {
+    const { id } = req.params;
+    // check validity if user is
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return errorResponse(res, "Invalid user ID.", status.BAD_REQUEST);
+    }
+
+    try {
+        const isUserExist = await User.findById(id);
+        if (!isUserExist) {
+            return errorResponse(res, `User not found.`, status.NOT_FOUND);
+        }
+
+        const deletedUser = await User.findByIdAndDelete(id);
+
+        return successResponse(
+            res,
+            "User deleted successfully.",
+            { user: deletedUser },
+            status.OK
+        );
+
+    } catch (error) {
+        return errorResponse(res, `Internal Server Error : ${error.message}`, status.INTERNAL_SERVER_ERROR);
+    }
 }
 
 module.exports = {
