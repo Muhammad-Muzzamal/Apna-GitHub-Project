@@ -3,7 +3,8 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken")
 const User = require("../models/user.model.js");
 const { ENV } = require("../config/env.config.js");
-const { successResponse, errorResponse } = require("../helper/apiResponse.js")
+const { successResponse, errorResponse } = require("../helper/apiResponse.js");
+const mongoose = require("mongoose");
 
 /**
  * @route   GET /api/allUsers
@@ -214,8 +215,39 @@ const login = async (req, res) => {
     }
 }
 
-const getUserProfile = (req, res) => {
-    return res.send("user profile fetched.");
+/**
+ * @desc    Fetch a user profile by ID
+ * @route   GET /api/users/:id
+ * @access  Public
+ *
+ * @param {Object} req - Express request object
+ * @param {Object} req.params
+ * @param {string} req.params.id - MongoDB ObjectId of the user
+ * @param {Object} res - Express response object
+ *
+ * @returns {Object} 200 - User fetched successfully
+ * @returns {Object} 500 - Internal server error
+ */
+const getUserProfile = async (req, res) => {
+
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return errorResponse(res, "Invalid user ID.", status.BAD_REQUEST);
+    }
+
+
+    try {
+        const user = await User.findById(id);
+
+        if (!user) {
+            return errorResponse(res, "User not found.", status.NOT_FOUND);
+        }
+
+        return successResponse(res, "User fetched successfully.", { user }, status.OK);
+    } catch (error) {
+        return errorResponse(res, `Internal Server Error ${error.message}`, status.INTERNAL_SERVER_ERROR);
+    }
 }
 
 const updateUserProfile = (req, res) => {
