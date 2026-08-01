@@ -9,6 +9,49 @@ const getAllUsers = (req, res) => {
     return res.send("All users fetched.");
 }
 
+/**
+ * @route   POST /api/signup
+ * @desc    Register a new user account.
+ *
+ * This endpoint creates a new user after validating the required
+ * input fields (username, email, and password). It ensures that
+ * both the username and email are unique, securely hashes the
+ * password using bcrypt, stores the user in the database, and
+ * generates a JWT authentication token for the newly registered user.
+ *
+ * @access  Public
+ *
+ * @body
+ * {
+ *   "username": "john_doe",
+ *   "email": "john@example.com",
+ *   "password": "SecurePassword123"
+ * }
+ *
+ * @success 201 Created
+ * {
+ *   "success": true,
+ *   "message": "User created successfully.",
+ *   "data": {
+ *     "user": {
+ *       "_id": "...",
+ *       "username": "john_doe",
+ *       "email": "john@example.com",
+ *       ...
+ *     },
+ *     "token": "JWT_TOKEN"
+ *   }
+ * }
+ *
+ * @error 400 Bad Request
+ * Missing required fields (username, email, or password).
+ *
+ * @error 409 Conflict
+ * Username or email already exists.
+ *
+ * @error 500 Internal Server Error
+ * An unexpected error occurred while creating the user.
+ */
 const signup = async (req, res) => {
     try {
         let { username, email, password } = req.body;
@@ -48,6 +91,46 @@ const signup = async (req, res) => {
     }
 }
 
+/**
+ * @route   POST /api/login
+ * @desc    Authenticate an existing user and return a JWT access token.
+ *
+ * This endpoint verifies the user's email and password. If the
+ * credentials are valid, it generates a JSON Web Token (JWT)
+ * that can be used to access protected routes.
+ *
+ * @access  Public
+ *
+ * @body
+ * {
+ *   "email": "john@example.com",
+ *   "password": "SecurePassword123"
+ * }
+ *
+ * @success 200 OK
+ * {
+ *   "success": true,
+ *   "message": "User logged in successfully.",
+ *   "data": {
+ *     "user": {
+ *       "_id": "...",
+ *       "username": "john_doe",
+ *       "email": "john@example.com",
+ *       ...
+ *     },
+ *     "token": "JWT_TOKEN"
+ *   }
+ * }
+ *
+ * @error 401 Unauthorized
+ * No account found for the provided email.
+ *
+ * @error 401 Unauthorized
+ * Invalid password or credentials.
+ *
+ * @error 500 Internal Server Error
+ * An unexpected error occurred while processing the login request.
+ */
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
