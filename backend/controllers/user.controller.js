@@ -5,8 +5,53 @@ const User = require("../models/user.model.js");
 const { ENV } = require("../config/env.config.js");
 const { successResponse, errorResponse } = require("../helper/apiResponse.js")
 
-const getAllUsers = (req, res) => {
-    return res.send("All users fetched.");
+/**
+ * @route   GET /api/allUsers
+ * @desc    Retrieve all registered users.
+ *
+ * This endpoint fetches all users from the database. If no users
+ * exist, it returns a successful response with an empty array and
+ * an appropriate message.
+ *
+ * @access  Public
+ *
+ * @success 200 OK
+ * {
+ *   "success": true,
+ *   "message": "Users fetched successfully.",
+ *   "data": {
+ *     "users": [
+ *       {
+ *         "_id": "...",
+ *         "username": "john_doe",
+ *         "email": "john@example.com",
+ *         ...
+ *       }
+ *     ]
+ *   }
+ * }
+ *
+ * @success 200 OK
+ * {
+ *   "success": true,
+ *   "message": "No users found.",
+ *   "data": []
+ * }
+ *
+ * @error 500 Internal Server Error
+ * An unexpected error occurred while fetching users.
+ */
+const getAllUsers = async (req, res) => {
+    try {
+        const users = await User.find({});
+
+        if (users.length === 0) {
+            return successResponse(res, "No users found.", { users }, status.OK);
+        }
+        return successResponse(res, "Users fetched successfully.", { users }, status.OK);
+    } catch (error) {
+        return errorResponse(res, `Internal server Error ${error.message}`, status.INTERNAL_SERVER_ERROR);
+    }
 }
 
 /**
