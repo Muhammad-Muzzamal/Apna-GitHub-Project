@@ -10,14 +10,14 @@ const IssueSchema = new Schema({
         type: String,
         required: true
     },
-    status: {
+    issueStatus: {
         type: String,
         enum: ["open", "closed"],
         default: "open"
     },
     repository: {
         type: Schema.Types.ObjectId,
-        ref: "Repository",
+        ref: "Repo",
         required: true
     }
 });
