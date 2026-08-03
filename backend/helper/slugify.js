@@ -1,0 +1,1 @@
+exports.slugify = (text) => text.trim().toLowerCase().replace(/\s+/g, "-");
