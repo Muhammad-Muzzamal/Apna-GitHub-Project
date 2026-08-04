@@ -1,10 +1,14 @@
+import React, { useContext, useState } from "react";
+
 import { FaGithub } from "react-icons/fa6";
-import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../../config/api.config.js";
 import toast from "react-hot-toast";
+import { useAuth } from "../../context/AuthContext.js";
 
 const SignUpPage = () => {
+  const { currentUser, setCurrentUser } = useAuth();
+
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -24,6 +28,7 @@ const SignUpPage = () => {
         return;
       }
       const response = await api.post("/signup", formData);
+      setCurrentUser(response?.data?.token);
       toast.success(response.data.message);
       setFormData({ username: "", email: "", password: "" });
       return;
