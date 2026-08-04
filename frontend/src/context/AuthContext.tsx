@@ -6,16 +6,17 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<string | null>(() => {
+    return localStorage.getItem("token");
+  });
 
   useEffect(() => {
-    const userId = localStorage.getItem("userId");
+    const userId = localStorage.getItem("token");
 
     if (userId) {
       setCurrentUser(userId);
     }
   }, []);
-
 
   const value = {
     currentUser,
