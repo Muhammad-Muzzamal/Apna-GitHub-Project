@@ -2,7 +2,8 @@ import { Navigate, Outlet } from 'react-router-dom';
 
 import React from 'react'
 import { useAuth } from '../context/AuthContext';
-const GuestRoutes = () => {
+
+const PublicRoutes = () => {
 
     const { currentUser } = useAuth();
 
@@ -13,4 +14,4 @@ const GuestRoutes = () => {
     return <Outlet />
 }
 
-export default GuestRoutes
+export default PublicRoutes

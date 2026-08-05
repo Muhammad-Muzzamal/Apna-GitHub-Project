@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+
 const AuthContext = createContext();
 
 export const useAuth = () => {
@@ -10,13 +11,14 @@ export const AuthProvider = ({ children }) => {
     return localStorage.getItem("token");
   });
 
-  useEffect(() => {
-    const userId = localStorage.getItem("token");
+  // useEffect(() => {
+  //   const userId = localStorage.getItem("token");
+  //   console.log(userId);
 
-    if (userId) {
-      setCurrentUser(userId);
-    }
-  }, []);
+  //   if (userId) {
+  //     setCurrentUser(userId);
+  //   }
+  // }, []);
 
   const value = {
     currentUser,

@@ -34,6 +34,7 @@ const SignUpPage = () => {
         return;
       }
       const response = await api.post("/signup", formData);
+      localStorage.setItem("token", response?.data?.data?.token);
       setCurrentUser(response?.data?.token);
       toast.success(response.data.message);
       navigate("/");

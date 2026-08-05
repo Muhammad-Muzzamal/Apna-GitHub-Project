@@ -28,9 +28,11 @@ const LoginPage = () => {
         return;
       }
       const response = await api.post("/login", formData);
+      console.log(response.data.data);
+      localStorage.setItem("token", response?.data?.data?.token);
       setCurrentUser(response?.data?.token);
       toast.success(response.data.message);
-      navigate("/")
+      navigate("/");
       setFormData({ email: "", password: "" });
       return;
     } catch (error: unknown) {
