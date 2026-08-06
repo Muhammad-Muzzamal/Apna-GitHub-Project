@@ -370,7 +370,7 @@ exports.fetchRepositoriesForCurrentUser = async (req, res) => {
         const repositories = await Repo.find({ owner: userID }).lean();
 
         if (repositories.length === 0) {
-            return errorResponse(res, "No repository found.", status.NOT_FOUND);
+            return errorResponse(res, "No repository found.", status.OK);
         }
 
         return successResponse(res, "Repository fetched successfully.", repositories, status.OK);
