@@ -168,7 +168,7 @@ exports.createRepository = async (req, res) => {
  */
 exports.getAllRepositories = async (req, res) => {
     try {
-        const repos = await Repo.find({}).lean();
+        const repos = await Repo.find({}).populate("owner" , "username email").lean();
 
         if (repos.length === 0) {
             return errorResponse(
@@ -367,10 +367,10 @@ exports.fetchRepositoriesForCurrentUser = async (req, res) => {
         const decoded = jwt.verify(token, ENV.JWT_SECRETE);
         const userID = decoded.id;
 
-        const repositories = await Repo.find({ owner: userID }).lean();
+        const repositories = await Repo.find({ owner: userID }).populate("owner", "username email").lean();
 
         if (repositories.length === 0) {
-            return errorResponse(res, "No repository found.", status.OK);
+            return successResponse(res, "No repository found.", [], status.OK);
         }
 
         return successResponse(res, "Repository fetched successfully.", repositories, status.OK);
