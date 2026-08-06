@@ -6,9 +6,16 @@ const Dashboard = () => {
   const { currentUser } = useAuth();
 
   useEffect(() => {
-    const fetchRepositories = () => {
-        // const response = api.get()
-    }
+    const fetchRepositories = async () => {
+      const response = await api.get("/repo/me", {
+        headers: {
+          Authorization: `Bearer ${currentUser}`,
+        },
+      });
+      console.log(response.data);
+    };
+
+    fetchRepositories();
   }, []);
 
   return <div>Dashboard</div>;
