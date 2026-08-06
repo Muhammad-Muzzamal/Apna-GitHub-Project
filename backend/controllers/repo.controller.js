@@ -5,6 +5,8 @@ const Repo = require("../models/repo.model.js");
 const Issue = require("../models/issue.model.js");
 const User = require("../models/user.model.js");
 const { slugify } = require("../helper/slugify.js");
+const jwt = require("jsonwebtoken")
+const { ENV } = require("../config/env.config.js")
 
 /**
  * @route   POST /api/repo/create
@@ -355,8 +357,16 @@ exports.fetchRepositoriesByName = async (req, res) => {
  * An unexpected error occurred while fetching the repositories.
  */
 exports.fetchRepositoriesForCurrentUser = async (req, res) => {
-    const { userID } = req.user;
+    const authHeader = req.headers.authorization;
     try {
+        if (!authHeader) {
+            return errorResponse(res, "No token provided.", status.UNAUTHORIZED);
+        }
+        const token = authHeader.split(" ")[1];
+
+        const decoded = jwt.verify(token, ENV.JWT_SECRETE);
+        const userID = decoded.id;
+
         const repositories = await Repo.find({ owner: userID }).lean();
 
         if (repositories.length === 0) {
@@ -623,7 +633,7 @@ exports.deleteRepositoryById = async (req, res) => {
         }
 
         const deletedRepository = await Repo.findByIdAndDelete(id);
-        
+
         if (!deletedRepository) {
             return errorResponse(res, "Repository not Found.", status.NOT_FOUND);
         }
