@@ -3,9 +3,11 @@ import { Route, Routes } from "react-router-dom";
 import HomePage from "../pages/HomePage";
 import LoginPage from "../pages/auth/LoginPage";
 import PrivateRoutes from "./PrivateRoutes";
+import Profile from "../pages/user/Profile";
 import PublicRoutes from "./PublicRoutes";
 import SignUpPage from "../pages/auth/SignUpPage";
 import { Toaster } from "react-hot-toast";
+import NotFound from '../pages/NotFound';
 
 export default function MainRouter() {
     return (
@@ -18,7 +20,10 @@ export default function MainRouter() {
 
                 <Route element={<PrivateRoutes />}>
                     <Route path={"/"} element={<HomePage />} />
+                    <Route path={"/profile"} element={<Profile />} />
                 </Route>
+
+                <Route path="*" element={<NotFound />} />
             </Routes>
             <Toaster />
         </>
