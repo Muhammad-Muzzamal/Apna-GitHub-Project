@@ -8,6 +8,7 @@ import PublicRoutes from "./PublicRoutes";
 import SignUpPage from "../pages/auth/SignUpPage";
 import { Toaster } from "react-hot-toast";
 import NotFound from '../pages/NotFound';
+import Dashboard from './../pages/dashboard/Dashboard';
 
 export default function MainRouter() {
     return (
@@ -21,6 +22,7 @@ export default function MainRouter() {
                 <Route element={<PrivateRoutes />}>
                     <Route path={"/"} element={<HomePage />} />
                     <Route path={"/profile"} element={<Profile />} />
+                    <Route path={"/dashboard"} element={<Dashboard />} />
                 </Route>
 
                 <Route path="*" element={<NotFound />} />
