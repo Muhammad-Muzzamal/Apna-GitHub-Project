@@ -1,4 +1,11 @@
-import { FaGithub, FaUserCircle } from "react-icons/fa";
+import { FaCaretDown, FaGithub, FaUserCircle } from "react-icons/fa";
+import { FaCodePullRequest, FaPlus } from "react-icons/fa6";
+
+import { FiInbox } from "react-icons/fi";
+import { GiHamburgerMenu } from "react-icons/gi";
+import { GoIssueOpened } from "react-icons/go";
+import { RiGitRepositoryLine } from "react-icons/ri";
+import { useState } from "react";
 
 type NavbarProps = {
   searchQuery: string;
@@ -13,70 +20,174 @@ const Navbar = ({
   searchResult,
   username,
 }: NavbarProps) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const pathname = window.location.pathname;
+
+  const navItems = [
+    {
+      label: "Overview",
+      path: "/profile",
+    },
+    {
+      label: "Repositories",
+      path: "/dashboard",
+      count: 71,
+    },
+    {
+      label: "Projects",
+      path: "/projects",
+    },
+    {
+      label: "Stars",
+      path: "/stars",
+      count: 71,
+    },
+  ];
+
   return (
-    <nav className="bg-[#161B22] border-b border-gray-700">
-      <div className="max-w-7xl mx-auto h-16 px-6 flex items-center justify-between">
-        {/* Left */}
-        <div className="flex items-center gap-5">
-          <FaGithub className="text-3xl text-white" />
+    <nav className="bg-[#010409] text-white border-b border-gray-800">
+      {/* Upper Part */}
+      <div className="px-4 sm:px-6 lg:px-8">
+        <div className="h-16 flex items-center justify-between gap-3">
+          {/* Left */}
+          <div className="flex items-center gap-3 min-w-0">
+            {/* Mobile Menu */}
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className=" text-gray-300 p-2 rounded-md hover:bg-[#21262D] border border-gray-600"
+            >
+              <GiHamburgerMenu className="text-xl" />
+            </button>
 
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search repositories..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-80 rounded-md border border-gray-600 bg-[#0D1117] px-3 py-2 text-sm text-white outline-none placeholder:text-gray-500 focus:border-blue-500"
-            />
+            {/* GitHub Logo */}
+            <FaGithub className="text-3xl shrink-0" />
 
-            {/* Search Suggestions */}
-            {searchQuery.trim() && (
-              <div className="absolute left-0 right-0 mt-2 max-h-80 overflow-y-auto rounded-md border border-gray-700 bg-[#161B22] shadow-lg z-50">
-                {searchResult.length > 0 ? (
-                  searchResult.map((repo) => (
-                    <div
-                      key={repo._id}
-                      className="cursor-pointer border-b border-gray-700 p-3 hover:bg-[#21262D] last:border-b-0"
-                    >
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-medium text-white">
-                          {repo.name}
-                        </h3>
+            {/* Username */}
+            <span className="font-semibold text-sm sm:text-base truncate">
+              {username || "Muhammad-Muzzamal"}
+            </span>
+          </div>
 
-                        <span
-                          className={`text-xs px-2 py-0.5 rounded-full border ${
-                            repo.visibility
-                              ? "border-green-600 text-green-400"
-                              : "border-gray-600 text-gray-300"
-                          }`}
-                        >
-                          {repo.visibility ? "Public" : "Private"}
-                        </span>
-                      </div>
+          {/* Right */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Search */}
+            <div className="hidden sm:block">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="outline outline-gray-600 w-40 md:w-50 py-1.5 rounded-md px-2 bg-[#0D1117] text-sm focus:ring-[#1F6FEB] focus:ring-2 transition focus:outline-none"
+                placeholder="Type to search"
+              />
+            </div>
 
-                      <p className="mt-1 text-xs text-gray-400 truncate">
-                        {repo.description}
-                      </p>
-                    </div>
-                  ))
-                ) : (
-                  <div className="p-3 text-sm text-gray-400">
-                    No repositories found.
-                  </div>
+            {/* Create */}
+            <div className="text-gray-400 p-2 border border-gray-600 rounded-md flex justify-between items-center gap-2 cursor-pointer hover:bg-[#21262D]">
+              <FaPlus />
+              <FaCaretDown className="hidden sm:block" />
+            </div>
+
+            {/* Issue */}
+            <div className="hidden md:flex text-gray-400 p-2 border border-gray-600 rounded-md hover:bg-[#21262D] cursor-pointer">
+              <GoIssueOpened />
+            </div>
+
+            {/* Pull Request */}
+            <div className="hidden lg:flex text-gray-400 p-2 border border-gray-600 rounded-md hover:bg-[#21262D] cursor-pointer">
+              <FaCodePullRequest />
+            </div>
+
+            {/* Repository */}
+            <div className="hidden lg:flex text-gray-400 p-2 border border-gray-600 rounded-md hover:bg-[#21262D] cursor-pointer">
+              <RiGitRepositoryLine />
+            </div>
+
+            {/* Inbox */}
+            <div className="hidden md:flex text-gray-400 p-2 border border-gray-600 rounded-md hover:bg-[#21262D] cursor-pointer">
+              <FiInbox />
+            </div>
+
+            {/* Profile */}
+            <div className="h-9 w-9 sm:h-10 sm:w-10 shrink-0 rounded-full bg-[#21262D] border border-gray-600 flex items-center justify-center">
+              <FaUserCircle className="text-2xl text-gray-300" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Search */}
+      <div className="sm:hidden px-4 pb-3">
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full outline outline-gray-600 py-2 rounded-md px-3 bg-[#0D1117] text-sm focus:ring-[#1F6FEB] focus:ring-2 transition focus:outline-none"
+          placeholder="Type to search"
+        />
+      </div>
+
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <div className="lg:hidden border-t border-gray-800 px-4 py-3">
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-3 p-2 text-gray-300 hover:bg-[#15191F] rounded-md">
+              <GoIssueOpened />
+              <span>Issues</span>
+            </div>
+
+            <div className="flex items-center gap-3 p-2 text-gray-300 hover:bg-[#15191F] rounded-md">
+              <FaCodePullRequest />
+              <span>Pull Requests</span>
+            </div>
+
+            <div className="flex items-center gap-3 p-2 text-gray-300 hover:bg-[#15191F] rounded-md">
+              <RiGitRepositoryLine />
+              <span>Repositories</span>
+            </div>
+
+            <div className="flex items-center gap-3 p-2 text-gray-300 hover:bg-[#15191F] rounded-md">
+              <FiInbox />
+              <span>Inbox</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Lower Part */}
+      <div className="overflow-x-auto scrollbar-hide">
+        <ul className="flex justify-start items-center px-4 sm:px-6 lg:px-13 space-x-2 sm:space-x-5 text-sm min-w-max">
+          {navItems.map((item) => {
+            const isActive = pathname === item.path;
+
+            return (
+              <li
+                key={item.path}
+                className={`
+                  px-2 sm:px-3
+                  py-2
+                  whitespace-nowrap
+                  hover:bg-[#15191F]
+                  rounded-t-md
+                  cursor-pointer
+                  ${
+                    isActive
+                      ? "border-b-2 border-[#F78166]"
+                      : "border-b-2 border-transparent"
+                  }
+                `}
+              >
+                {item.label}
+
+                {item.count && (
+                  <span className="bg-[#252A31] px-1.5 rounded-xl ml-2 text-xs">
+                    {item.count}
+                  </span>
                 )}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Right */}
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-medium text-white">{username}</span>
-
-          <div className="h-10 w-10 rounded-full bg-[#21262D] border border-gray-600 flex items-center justify-center">
-            <FaUserCircle className="text-2xl text-gray-300" />
-          </div>
-        </div>
+              </li>
+            );
+          })}
+        </ul>
       </div>
     </nav>
   );
