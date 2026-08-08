@@ -1,12 +1,12 @@
-import { useEffect } from "react";
-import { useAuth } from "../../context/AuthContext";
-import api from "../../config/api.config";
-import toast from "react-hot-toast";
-import { useState } from "react";
-import Navbar from "./Navbar";
 import LeftSidebar from "./LeftSidebar";
+import Navbar from "./Navbar";
 import RepositoryList from "./RepositoryList";
 import RightSidebar from "./RightSidebar";
+import api from "../../config/api.config";
+import toast from "react-hot-toast";
+import { useAuth } from "../../context/AuthContext";
+import { useEffect } from "react";
+import { useState } from "react";
 
 const Dashboard = () => {
   const { currentUser } = useAuth();
@@ -29,7 +29,7 @@ const Dashboard = () => {
         toast.success(response.data.message);
       } catch (error) {
         toast.error("Error while Fetching repository");
-        console.log(error);
+        console.log("Error : ", error);
       }
     };
 
@@ -75,7 +75,7 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">
           <LeftSidebar suggestedRepository={suggestedRepository} />
           <RepositoryList repository={repository} />
-          <RightSidebar />
+          {/* <RightSidebar /> */}
         </div>
       </div>
     </main>

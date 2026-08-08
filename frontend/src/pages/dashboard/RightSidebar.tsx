@@ -2,7 +2,7 @@ import React from "react";
 
 const RightSidebar = () => {
   return (
-    <aside className="order-3 lg:col-span-3 lg:pl-6">
+    <aside className="order-2 lg:col-span-3 lg:pl-6">
       <div className="sticky top-6">
         <h2 className="text-xl font-semibold mb-5">Recent Activity</h2>
 

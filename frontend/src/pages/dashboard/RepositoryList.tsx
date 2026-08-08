@@ -1,10 +1,68 @@
+import React, { useEffect, useState } from "react";
+
+import { MdCreateNewFolder } from "react-icons/md";
+
 const RepositoryList = ({ repository }) => {
+  const [sortValue, setSortValue] = useState<string>("");
+  const [sortedRepositories, setSortedRepositories] = useState(repository);
+
+  useEffect(() => {
+    setSortedRepositories(repository);
+  }, [repository]);
+
+  const handleSortValue = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    console.log(e.target.value);
+    if (e.target.value === "default") {
+      setSortedRepositories(repository);
+      return;
+    }
+    if (e.target.value === "name") {
+      const sorted = [...sortedRepositories].sort((a, b) =>
+        a.name.localeCompare(b.name),
+      );
+      setSortedRepositories(sorted);
+      return;
+    }
+    if (e.target.value === "default") {
+      const sorted = [...sortedRepositories].sort(
+        (a, b) =>
+          new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime(),
+      );
+      setSortedRepositories(sorted);
+      return;
+    }
+  };
+
   return (
-    <section className="order-1 lg:order-2 lg:col-span-6 lg:px-6 lg:border-r lg:border-gray-800">
+    <section className="order-1 lg:order-2 lg:col-span-9 lg:px-6  lg:border-gray-800">
       <h2 className="text-2xl font-bold mb-5">My Repositories</h2>
+      <div className="flex justify-start items-center space-x-5 mb-3">
+        <input
+          type="text"
+          className="outline outline-gray-600 w-100 py-1 rounded-md px-2 focus:ring-[#1F6FEB] focus:ring-2 transition focus:outline-none"
+          placeholder="Find a repository..."
+        />
+        <select
+          name="sort"
+          id="sort"
+          className="border bg-[#262C36] px-3 py-1 border border-gray-600 rounded-md"
+          onChange={handleSortValue}
+        >
+          <option value="">Sort</option>
+          <option value="name">Name</option>
+          <option value="update">update</option>
+          <option value="default">default</option>
+        </select>
+
+        <button className="bg-[#29903B] flex items-center px-3 py-1 rounded-md">
+          <MdCreateNewFolder className="mr-2" />
+          New
+        </button>
+      </div>
+      <hr className="border-gray-600" />
 
       <div>
-        {repository.map((repo) => (
+        {sortedRepositories.map((repo) => (
           <div
             key={repo._id}
             className="py-6 border-b border-gray-800 last:border-b-0"

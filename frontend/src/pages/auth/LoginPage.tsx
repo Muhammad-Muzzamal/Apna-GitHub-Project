@@ -28,12 +28,11 @@ const LoginPage = () => {
         return;
       }
       const response = await api.post("/login", formData);
-      console.log(response.data.data);
       localStorage.setItem("token", response?.data?.data?.token);
-      setCurrentUser(response?.data?.token);
+      setCurrentUser(response?.data?.data?.token);
       toast.success(response.data.message);
-      navigate("/");
       setFormData({ email: "", password: "" });
+      navigate("/");
       return;
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
