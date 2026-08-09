@@ -155,15 +155,18 @@ const Navbar = ({
       )}
 
       {/* Lower Part */}
-      <div className="overflow-x-auto scrollbar-hide">
-        <ul className="flex justify-start items-center px-4 sm:px-6 lg:px-13 space-x-2 sm:space-x-5 text-sm min-w-max">
-          {navItems.map((item) => {
-            const isActive = pathname === item.path;
+      {window.location.pathname === "/repo/new" ? (
+        <></>
+      ) : (
+        <div className="overflow-x-auto scrollbar-hide">
+          <ul className="flex justify-start items-center px-4 sm:px-6 lg:px-13 space-x-2 sm:space-x-5 text-sm min-w-max">
+            {navItems.map((item) => {
+              const isActive = pathname === item.path;
 
-            return (
-              <li
-                key={item.path}
-                className={`
+              return (
+                <li
+                  key={item.path}
+                  className={`
                   px-2 sm:px-3
                   py-2
                   whitespace-nowrap
@@ -176,19 +179,20 @@ const Navbar = ({
                       : "border-b-2 border-transparent"
                   }
                 `}
-              >
-                {item.label}
+                >
+                  {item.label}
 
-                {item.count && (
-                  <span className="bg-[#252A31] px-1.5 rounded-xl ml-2 text-xs">
-                    {item.count}
-                  </span>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+                  {item.count && (
+                    <span className="bg-[#252A31] px-1.5 rounded-xl ml-2 text-xs">
+                      {item.count}
+                    </span>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
     </nav>
   );
 };

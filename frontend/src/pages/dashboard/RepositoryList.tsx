@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import { CiStar } from "react-icons/ci";
+import { Link } from "react-router-dom";
 import { MdCreateNewFolder } from "react-icons/md";
 
 const RepositoryList = ({ repository }) => {
@@ -73,10 +74,13 @@ const RepositoryList = ({ repository }) => {
           <option value="default">default</option>
         </select>
 
-        <button className="bg-[#29903B] flex items-center justify-center px-3 py-1 rounded-md w-full sm:w-auto">
+        <Link
+          className="bg-[#29903B] flex items-center justify-center px-3 py-1 rounded-md w-full sm:w-auto"
+          to={"/repo/new"}
+        >
           <MdCreateNewFolder className="mr-2" />
           New
-        </button>
+        </Link>
       </div>
 
       <hr className="border-gray-600" />

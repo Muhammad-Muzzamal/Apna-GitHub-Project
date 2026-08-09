@@ -10,7 +10,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useState } from "react";
 
 const LoginPage = () => {
-  const { currentUser, setCurrentUser } = useAuth();
+  const { setCurrentUser, setCurrentUserID } = useAuth();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -29,7 +29,9 @@ const LoginPage = () => {
       }
       const response = await api.post("/login", formData);
       localStorage.setItem("token", response?.data?.data?.token);
+      localStorage.setItem("userID", response?.data?.data?.user?._id);
       setCurrentUser(response?.data?.data?.token);
+      setCurrentUserID(response?.data?.data?.user?._id);
       toast.success(response.data.message);
       setFormData({ email: "", password: "" });
       navigate("/");

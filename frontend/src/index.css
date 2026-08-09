@@ -1,19 +1,1 @@
 @import "tailwindcss";
-
-/* In your global CSS file */
-.left-sidebar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.left-sidebar::-webkit-scrollbar-track {
-  background: #0D1117;
-}
-
-.left-sidebar::-webkit-scrollbar-thumb {
-  background: #30363D;
-  border-radius: 3px;
-}
-
-.left-sidebar::-webkit-scrollbar-thumb:hover {
-  background: #484f58;
-}
