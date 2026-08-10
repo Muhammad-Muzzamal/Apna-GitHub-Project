@@ -15,7 +15,7 @@ const NewRepository = () => {
     visibility: true,
     owner: currentUserID,
   });
-  const [loading, setLoading] = useState<Boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -69,7 +69,7 @@ const NewRepository = () => {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="rounded-lg">
+        <form onSubmit={handleSubmit} className="bg-[#161b22] border border-[#30363d] rounded-xl p-6 shadow-xl shadow-black/30">
           {/* Repository Name */}
           <div className="mb-6">
             <label
