@@ -1,6 +1,7 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useState,
   type Dispatch,
   type ReactNode,
@@ -16,6 +17,8 @@ type AuthContextType = {
   setCurrentUser: Dispatch<SetStateAction<string | null>>;
   currentUserID: string | null;
   setCurrentUserID: Dispatch<SetStateAction<string | null>>;
+  userName: string | null;
+  setUserName: Dispatch<SetStateAction<string | null>>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -38,20 +41,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return localStorage.getItem("userID");
   });
 
-  // useEffect(() => {
-  //   const userId = localStorage.getItem("token");
-  //   console.log(userId);
-
-  //   if (userId) {
-  //     setCurrentUser(userId);
-  //   }
-  // }, []);
+  const [userName, setUserName] = useState<string | null>("");
 
   const value: AuthContextType = {
     currentUser,
     setCurrentUser,
     currentUserID,
     setCurrentUserID,
+    userName,
+    setUserName,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

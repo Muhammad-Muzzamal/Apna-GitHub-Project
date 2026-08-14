@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom";
 
 import Dashboard from './../pages/dashboard/Dashboard';
 import HomePage from "../pages/HomePage";
@@ -21,7 +21,8 @@ export default function MainRouter() {
                 </Route>
 
                 <Route element={<PrivateRoutes />}>
-                    <Route path={"/"} element={<HomePage />} />
+                    <Route path={"/"} element={<Navigate to="/profile" replace />} />
+                    <Route path={"/profile"} element={<HomePage />} />
                     <Route path={"/profile"} element={<Profile />} />
                     <Route path={"/dashboard"} element={<Dashboard />} />
                     <Route path={"/repo/new"} element={<NewRepository />} />

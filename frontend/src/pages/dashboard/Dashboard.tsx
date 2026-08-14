@@ -25,8 +25,6 @@ const Dashboard = () => {
           },
         });
         setRepository(response.data?.data);
-        console.log(response.data?.data);
-        toast.success(response.data.message);
       } catch (error) {
         toast.error("Error while Fetching repository");
         console.log("Error : ", error);

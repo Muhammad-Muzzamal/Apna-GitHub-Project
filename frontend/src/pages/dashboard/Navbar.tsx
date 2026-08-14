@@ -5,7 +5,10 @@ import { FiInbox } from "react-icons/fi";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { GoIssueOpened } from "react-icons/go";
 import { RiGitRepositoryLine } from "react-icons/ri";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import api from "../../config/api.config";
+import { useAuth } from "../../context/AuthContext";
+import { Link } from "react-router-dom";
 
 type NavbarProps = {
   searchQuery: string;
@@ -21,8 +24,24 @@ const Navbar = ({
   username,
 }: NavbarProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [repositoryCount, setRepositoryCount] = useState<number>(0);
+  const { currentUser, userName } = useAuth();
 
   const pathname = window.location.pathname;
+
+  useEffect(() => {
+    const fetchRepositories = async () => {
+      const response = await api.get("/repo/user/me", {
+        headers: {
+          Authorization: `Bearer ${currentUser}`,
+        },
+      });
+      const repositorries = response?.data?.data;
+      // console.log(repositorries.length);
+      setRepositoryCount(repositorries.length);
+    };
+    fetchRepositories();
+  }, [repositoryCount]);
 
   const navItems = [
     {
@@ -32,7 +51,7 @@ const Navbar = ({
     {
       label: "Repositories",
       path: "/dashboard",
-      count: 71,
+      count: repositoryCount,
     },
     {
       label: "Projects",
@@ -65,7 +84,7 @@ const Navbar = ({
 
             {/* Username */}
             <span className="font-semibold text-sm sm:text-base truncate">
-              {username || "Muhammad-Muzzamal"}
+              {userName}
             </span>
           </div>
 
@@ -164,7 +183,7 @@ const Navbar = ({
               const isActive = pathname === item.path;
 
               return (
-                <li
+                <Link
                   key={item.path}
                   className={`
                   px-2 sm:px-3
@@ -179,6 +198,7 @@ const Navbar = ({
                       : "border-b-2 border-transparent"
                   }
                 `}
+                  to={`${item.path}`}
                 >
                   {item.label}
 
@@ -187,7 +207,7 @@ const Navbar = ({
                       {item.count}
                     </span>
                   )}
-                </li>
+                </Link>
               );
             })}
           </ul>
