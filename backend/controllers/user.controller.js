@@ -519,6 +519,42 @@ const refreshToken = async (req, res) => {
     }
 };
 
+
+/**
+ * @route   POST /api/auth/logout
+ * @desc    Log the user out — clear auth cookies and revoke the refresh token.
+ * @access  Private (requires valid accessToken)
+ */
+const logout = async (req, res) => {
+    try {
+        const userId = req.user?.id; // set by auth middleware
+
+        if (userId) {
+            // Revoke refresh token in DB so it can't be reused
+            await User.findByIdAndUpdate(userId, { refreshToken: null });
+        }
+
+        // Clear both cookies
+        res.clearCookie("accessToken", {
+            httpOnly: true,
+            secure: ENV.NODE_ENV === "production",
+            sameSite: "strict",
+        });
+
+        res.clearCookie("refreshToken", {
+            httpOnly: true,
+            secure: ENV.NODE_ENV === "production",
+            sameSite: "strict",
+            path: "/api/auth/refresh", // must match the path used when setting it
+        });
+
+        return successResponse(res, "Logged out successfully.", {}, status.OK);
+    } catch (error) {
+        console.error("Logout error:", error);
+        return errorResponse(res, "Something went wrong. Please try again.", status.INTERNAL_SERVER_ERROR);
+    }
+};
+
 module.exports = {
     getAllUsers,
     signup,
@@ -526,5 +562,6 @@ module.exports = {
     getUserProfile,
     updateUserProfile,
     deleteUserProfile,
-    refreshToken
+    refreshToken,
+    logout
 };
