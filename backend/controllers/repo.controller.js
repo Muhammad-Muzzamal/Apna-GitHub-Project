@@ -65,9 +65,10 @@ exports.createRepository = async (req, res) => {
         description,
         content,
         visibility,
-        owner,
         issues
     } = req.body;
+
+    const owner = req.user._id;
 
     // if name is not required
     if (!name || !name.trim()) {
@@ -168,14 +169,10 @@ exports.createRepository = async (req, res) => {
  */
 exports.getAllRepositories = async (req, res) => {
     try {
-        const repos = await Repo.find({}).populate("owner" , "username email").lean();
+        const repos = await Repo.find({}).populate("owner", "username email").lean();
 
         if (repos.length === 0) {
-            return errorResponse(
-                res,
-                `No repository found.`,
-                status.NOT_FOUND
-            );
+            return successResponse(res, "No repositories found.", [], status.OK);
         }
 
         return successResponse(res, "All repositories fetched.", repos, status.OK);
@@ -357,28 +354,23 @@ exports.fetchRepositoriesByName = async (req, res) => {
  * An unexpected error occurred while fetching the repositories.
  */
 exports.fetchRepositoriesForCurrentUser = async (req, res) => {
-    const authHeader = req.headers.authorization;
     try {
-        if (!authHeader) {
-            return errorResponse(res, "No token provided.", status.UNAUTHORIZED);
-        }
-        const token = authHeader.split(" ")[1];
+        const userID = req.user._id; // set by authMiddleware, no manual token parsing needed
 
-        const decoded = jwt.verify(token, ENV.JWT_SECRETE);
-        const userID = decoded.id;
-
-        const repositories = await Repo.find({ owner: userID }).populate("owner", "username email").lean();
+        const repositories = await Repo.find({ owner: userID })
+            .populate("owner", "username email")
+            .lean();
 
         if (repositories.length === 0) {
             return successResponse(res, "No repository found.", [], status.OK);
         }
 
         return successResponse(res, "Repository fetched successfully.", repositories, status.OK);
-
     } catch (error) {
-        return errorResponse(res, `Internal Server Error ${error.message}`, status.INTERNAL_SERVER_ERROR);
+        console.error("Fetch repositories error:", error);
+        return errorResponse(res, "Something went wrong. Please try again.", status.INTERNAL_SERVER_ERROR);
     }
-}
+};
 
 /**
  * @route   PUT /api/repo/update/:id
@@ -455,6 +447,10 @@ exports.updateRepository = async (req, res) => {
             );
         }
 
+        if (repository.owner.toString() !== req.user._id.toString()) {
+            return errorResponse(res, "You are not authorized to modify this repository.", status.FORBIDDEN);
+        }
+
         const updateData = {};
 
         // Update name only if provided
@@ -508,6 +504,7 @@ exports.updateRepository = async (req, res) => {
         );
 
     } catch (error) {
+        console.error("Update repository error:", error);
         return errorResponse(
             res,
             `Internal Server Error ${error.message}`,
@@ -574,6 +571,10 @@ exports.toggleVisibilityById = async (req, res) => {
             );
         }
 
+        if (repository.owner.toString() !== req.user._id.toString()) {
+            return errorResponse(res, "You are not authorized to modify this repository.", status.FORBIDDEN);
+        }
+
         repository.visibility = !repository.visibility;
 
         const updatedRepository = await repository.save();
@@ -630,6 +631,15 @@ exports.deleteRepositoryById = async (req, res) => {
     try {
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return errorResponse(res, "Invalid repository ID.", status.BAD_REQUEST);
+        }
+
+        const repository = await Repo.findById(id);
+        if (!repository) {
+            return errorResponse(res, "Repository not found.", status.NOT_FOUND);
+        }
+
+        if (repository.owner.toString() !== req.user._id.toString()) {
+            return errorResponse(res, "You are not authorized to delete this repository.", status.FORBIDDEN);
         }
 
         const deletedRepository = await Repo.findByIdAndDelete(id);

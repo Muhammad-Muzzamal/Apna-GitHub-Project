@@ -7,9 +7,9 @@ userRouter.get("/allUsers", userController.getAllUsers);
 userRouter.post("/signup", userController.signup);
 userRouter.post("/logout", authMiddleware, userController.logout);
 userRouter.post("/login", userController.login);
-userRouter.get("/userProfile/:id", userController.getUserProfile);
-userRouter.put("/updateProfile/:id", userController.updateUserProfile);
-userRouter.delete("/deleteProfile/:id", userController.deleteUserProfile);
+userRouter.get("/userProfile/:id", authMiddleware, userController.getUserProfile);
+userRouter.put("/updateProfile/:id", authMiddleware, userController.updateUserProfile);
+userRouter.delete("/deleteProfile/:id", authMiddleware, userController.deleteUserProfile);
 userRouter.post("/auth/refresh", userController.refreshToken);
 userRouter.get("/auth/me", authMiddleware, userController.getMe);
 

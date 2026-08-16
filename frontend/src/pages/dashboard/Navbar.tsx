@@ -1,14 +1,14 @@
 import { FaCaretDown, FaGithub, FaUserCircle } from "react-icons/fa";
 import { FaCodePullRequest, FaPlus } from "react-icons/fa6";
+import { useEffect, useState } from "react";
 
 import { FiInbox } from "react-icons/fi";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { GoIssueOpened } from "react-icons/go";
+import { Link } from "react-router-dom";
 import { RiGitRepositoryLine } from "react-icons/ri";
-import { useState, useEffect } from "react";
 import api from "../../config/api.config";
 import { useAuth } from "../../context/AuthContext";
-import { Link } from "react-router-dom";
 
 type NavbarProps = {
   searchQuery: string;
@@ -31,11 +31,7 @@ const Navbar = ({
 
   useEffect(() => {
     const fetchRepositories = async () => {
-      const response = await api.get("/repo/user/me", {
-        headers: {
-          Authorization: `Bearer ${currentUser}`,
-        },
-      });
+      const response = await api.get("/repo/user/me");
       const repositorries = response?.data?.data;
       // console.log(repositorries.length);
       setRepositoryCount(repositorries.length);

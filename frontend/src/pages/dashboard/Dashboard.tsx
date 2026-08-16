@@ -1,29 +1,26 @@
 import LeftSidebar from "./LeftSidebar";
 import Navbar from "./Navbar";
 import RepositoryList from "./RepositoryList";
-import RightSidebar from "./RightSidebar";
 import api from "../../config/api.config";
 import toast from "react-hot-toast";
 import { useAuth } from "../../context/AuthContext";
 import { useEffect } from "react";
 import { useState } from "react";
 
+// import RightSidebar from "./RightSidebar";
+
 const Dashboard = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, loading } = useAuth();
   const [repository, setRepository] = useState([]);
   const [suggestedRepository, setSuggestedRepository] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResult, setSearchResult] = useState([]);
 
   useEffect(() => {
-    if (!currentUser) return;
+    if (loading || !currentUser) return;
     const fetchRepositories = async () => {
       try {
-        const response = await api.get("/repo/user/me", {
-          headers: {
-            Authorization: `Bearer ${currentUser}`,
-          },
-        });
+        const response = await api.get("/repo/user/me");
         setRepository(response.data?.data);
       } catch (error) {
         toast.error("Error while Fetching repository");
@@ -43,7 +40,7 @@ const Dashboard = () => {
 
     fetchRepositories();
     fetchSuggestedRepositories();
-  }, []);
+  }, [currentUser, loading]);
 
   useEffect(() => {
     const query = searchQuery.toLowerCase().trim().replace(/\s+/g, "-");
