@@ -10,30 +10,30 @@ import { useAuth } from "../../context/AuthContext";
 import { useState } from "react";
 
 const LoginPage = () => {
-  const { setCurrentUser, setCurrentUserID, setUserName } = useAuth();
+  const { setCurrentUser } = useAuth();
   const navigate = useNavigate();
 
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (!formData.email || !formData.password) {
+      toast.error("Please fill in all fields.");
+      return;
+    }
+
     setLoading(true);
     try {
-      if (!formData.email || !formData.password) {
-        toast.error("Please fill in all fields.");
-        return;
-      }
       const response = await api.post("/login", formData);
-      localStorage.setItem("token", response?.data?.data?.token);
-      localStorage.setItem("userID", response?.data?.data?.user?._id);
-      setCurrentUser(response?.data?.data?.token);
-      setUserName(response.data?.data?.user?.username);
-      setCurrentUserID(response?.data?.data?.user?._id);
+      
+      setCurrentUser(response?.data?.data?.user);
       toast.success(response.data.message);
+      
       setFormData({ email: "", password: "" });
       navigate("/");
       return;
