@@ -15,6 +15,7 @@ const cors = require("cors");
 const { Server } = require("socket.io");
 const mongoose = require("mongoose");
 const mainRouter = require("./routes/main.router.js")
+const cookieParser = require("cookie-parser");
 
 yargs(hideBin(process.argv))
     .command("start", "Start a new Server", {}, startServer)
@@ -81,7 +82,12 @@ async function startServer() {
 
         const app = express();
         app.use(express.json());
-        app.use(cors({ origin: '*' }));
+        app.use(cookieParser());
+        app.use(cors({
+            origin: "http://localhost:5173", 
+            credentials: true
+        }));
+        app.use("/api", mainRouter);
         app.use("/api", mainRouter);
 
         await connectDB();

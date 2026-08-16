@@ -117,7 +117,7 @@ const signup = async (req, res) => {
             )
         }
 
-        let hashedPassword = await bcrypt.hash(password, 10);
+        let hashedPassword = await bcrypt.hash(password, 12);
 
         const user = await User.create({
             username,
@@ -125,15 +125,44 @@ const signup = async (req, res) => {
             password: hashedPassword
         });
 
-        // generate token
-        const token = jwt.sign(
+        // access token - Short lives
+        const accessToken = jwt.sign(
             { id: user._id },
             ENV.JWT_SECRETE,
-            { expiresIn: "1h" }
+            { expiresIn: "15m" }
         )
-        return successResponse(res, "User created successfully.", { user, token }, status.CREATED);
+
+        // refresh token long live
+        const refreshToken = jwt.sign(
+            { id: user._id },
+            ENV.JWT_REFRESH_SECRETE,
+            { expiresIn: "7d" }
+        )
+
+        user.refreshToken = refreshToken;
+        await user.save();
+
+        res.cookie("accessToken", accessToken, {
+            httpOnly: true,
+            secure: ENV.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 15 * 60 * 1000
+        });
+
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: ENV.NODE_ENV === "production",
+            sameSite: "strict",
+            path: "/api/auth/refresh", // only sent to refresh endpoint
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+
+        const { password: _, refreshToken: __, ...safeUser } = user.toObject();
+
+        return successResponse(res, "User created successfully.", { safeUser }, status.CREATED);
     } catch (error) {
-        return errorResponse(res, `Internal Server Error ${error.message}`, status.INTERNAL_SERVER_ERROR);
+        console.log("Signup Error : ", error);
+        return errorResponse(res, `Something went wrong. Please try again.`, status.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -181,16 +210,15 @@ const login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
+        if (!email || !password) {
+            return errorResponse(res, "Email and password are required.", status.BAD_REQUEST);
+        }
 
         // check user exist or not
         const user = await User.findOne({ email }).select("+password");
         // user not found
         if (!user) {
-            return errorResponse(
-                res,
-                "No account found for this email. Create an account to get started.",
-                status.UNAUTHORIZED
-            );
+            return errorResponse(res, "Invalid email or password.", status.UNAUTHORIZED);
         }
 
         // check password is correct
@@ -198,20 +226,38 @@ const login = async (req, res) => {
 
         // if password is incorrect
         if (!isMatch) {
-            return errorResponse(
-                res,
-                "Invalid credentials. Please check your password.",
-                status.UNAUTHORIZED
-            )
+            return errorResponse(res, "Invalid email or password.", status.UNAUTHORIZED);
         }
 
-        const token = jwt.sign({ id: user._id }, ENV.JWT_SECRETE, { expiresIn: "1h" });
+        const accessToken = jwt.sign({ id: user._id }, ENV.JWT_SECRETE, { expiresIn: "15m" });
+        const refreshToken = jwt.sign({ id: user._id }, ENV.JWT_REFRESH_SECRETE, { expiresIn: "7d" });
 
-        return successResponse(res, "User logged in successfully.", { user, token }, status.OK);
+        user.refreshToken = refreshToken;
+        await user.save();
+
+        res.cookie("accessToken", accessToken, {
+            httpOnly: true,
+            secure: ENV.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 15 * 60 * 1000
+        });
+
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: ENV.NODE_ENV === "production",
+            sameSite: "strict",
+            path: "/api/auth/refresh",
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+
+        const { password: _, refreshToken: __, ...safeUser } = user.toObject();
+
+        return successResponse(res, "User logged in successfully.", { user: safeUser }, status.OK);
 
 
     } catch (error) {
-        return errorResponse(res, `Internal Server Error ${error.message}`, status.INTERNAL_SERVER_ERROR);
+        console.error("Login error:", error);
+        return errorResponse(res, "Something went wrong. Please try again.", status.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -399,11 +445,86 @@ const deleteUserProfile = async (req, res) => {
     }
 }
 
+/**
+ * @route   POST /api/auth/refresh
+ * @desc    Issue a new access token using a valid refresh token.
+ * @access  Public (relies on refreshToken cookie)
+ */
+const refreshToken = async (req, res) => {
+    try {
+        const incomingRefreshToken = req.cookies.refreshToken;
+
+        if (!incomingRefreshToken) {
+            return errorResponse(res, "Refresh token missing. Please log in again.", status.UNAUTHORIZED);
+        }
+
+        // Verify the refresh token itself is valid/not expired
+        let decoded;
+        try {
+            decoded = jwt.verify(incomingRefreshToken, ENV.JWT_REFRESH_SECRET);
+        } catch (err) {
+            return errorResponse(res, "Invalid or expired refresh token. Please log in again.", status.UNAUTHORIZED);
+        }
+
+        const user = await User.findById(decoded.id);
+        if (!user) {
+            return errorResponse(res, "User not found.", status.UNAUTHORIZED);
+        }
+
+        // Check it matches what we have stored (detects reuse/theft of an old token)
+        if (user.refreshToken !== incomingRefreshToken) {
+            // Someone is using a refresh token that's no longer valid/current
+            // Optional: wipe all sessions here for safety
+            user.refreshToken = undefined;
+            await user.save();
+            return errorResponse(res, "Refresh token reuse detected. Please log in again.", status.UNAUTHORIZED);
+        }
+
+        // Issue a new access token
+        const newAccessToken = jwt.sign(
+            { id: user._id },
+            ENV.JWT_SECRET,
+            { expiresIn: "15m" }
+        );
+
+        // Rotate the refresh token too (best practice)
+        const newRefreshToken = jwt.sign(
+            { id: user._id },
+            ENV.JWT_REFRESH_SECRET,
+            { expiresIn: "7d" }
+        );
+
+        user.refreshToken = newRefreshToken;
+        await user.save();
+
+        res.cookie("accessToken", newAccessToken, {
+            httpOnly: true,
+            secure: ENV.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 15 * 60 * 1000
+        });
+
+        res.cookie("refreshToken", newRefreshToken, {
+            httpOnly: true,
+            secure: ENV.NODE_ENV === "production",
+            sameSite: "strict",
+            path: "/api/auth/refresh",
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+
+        return successResponse(res, "Token refreshed successfully.", {}, status.OK);
+    } catch (error) {
+        console.error("Refresh token error:", error);
+        return errorResponse(res, "Something went wrong. Please try again.", status.INTERNAL_SERVER_ERROR);
+    }
+};
+
 module.exports = {
     getAllUsers,
     signup,
     login,
     getUserProfile,
     updateUserProfile,
-    deleteUserProfile
+    deleteUserProfile,
+    refreshToken
 };

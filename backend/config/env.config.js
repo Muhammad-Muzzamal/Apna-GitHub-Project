@@ -10,7 +10,10 @@ const ENV = {
     PORT: process.env.PORT,
     DB_URI: process.env.DB_URI,
     DB_NAME: process.env.DB_NAME,
-    JWT_SECRETE: process.env.JWT_SECRETE
+    JWT_SECRETE: process.env.JWT_SECRETE,
+    JWT_REFRESH_SECRETE: process.env.JWT_REFRESH_SECRETE,
+    NODE_ENV: process.env.NODE_ENV,
+
 
 }
 
