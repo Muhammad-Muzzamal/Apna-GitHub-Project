@@ -22,20 +22,22 @@ const SignUpPage = () => {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (
+      !formData.username ||
+      !formData.username.trim() ||
+      !formData.email ||
+      !formData.password
+    ) {
+      toast.error("Please fill in all fields.");
+      return;
+    }
     setLoading(true);
+    
     try {
-      if (
-        !formData.username ||
-        !formData.username.trim() ||
-        !formData.email ||
-        !formData.password
-      ) {
-        toast.error("Please fill in all fields.");
-        return;
-      }
       const response = await api.post("/signup", formData);
-      localStorage.setItem("token", response?.data?.data?.token);
-      setCurrentUser(response?.data?.token);
+      
+      setCurrentUser(response?.data?.data?.user);
       toast.success(response.data.message);
       navigate("/");
       setFormData({ username: "", email: "", password: "" });
@@ -47,7 +49,7 @@ const SignUpPage = () => {
         toast.error("Unexpected Error.");
       }
     } finally {
-      setLoading(true);
+      setLoading(false);
     }
   };
 
