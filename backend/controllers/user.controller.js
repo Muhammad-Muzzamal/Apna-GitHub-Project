@@ -159,7 +159,7 @@ const signup = async (req, res) => {
 
         const { password: _, refreshToken: __, ...safeUser } = user.toObject();
 
-        return successResponse(res, "User created successfully.", { safeUser }, status.CREATED);
+        return successResponse(res, "User created successfully.", { user: safeUser }, status.CREATED);
     } catch (error) {
         console.log("Signup Error : ", error);
         return errorResponse(res, `Something went wrong. Please try again.`, status.INTERNAL_SERVER_ERROR);
@@ -555,6 +555,15 @@ const logout = async (req, res) => {
     }
 };
 
+/**
+ * @route   GET /api/auth/me
+ * @desc    Return the currently authenticated user.
+ * @access  Private
+ */
+const getMe = async (req, res) => {
+    return successResponse(res, "User fetched successfully.", { user: req.user }, status.OK);
+};
+
 module.exports = {
     getAllUsers,
     signup,
@@ -563,5 +572,6 @@ module.exports = {
     updateUserProfile,
     deleteUserProfile,
     refreshToken,
-    logout
+    logout,
+    getMe
 };
